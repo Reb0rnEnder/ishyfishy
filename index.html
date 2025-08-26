@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Lookup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #eee;
+      padding: 20px;
+    }
+    h1 {
+      color: #fff;
+    }
+    .input-section {
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      width: 250px;
+    }
+    button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      background: #1e88e5;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .results {
+      margin-top: 20px;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .card h2 {
+      margin: 0 0 10px 0;
+      color: #64b5f6;
+    }
+    .answers {
+      margin-top: 10px;
+    }
+    .answers li {
+      margin-bottom: 6px;
+    }
+    a {
+      color: #90caf9;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>User Lookup</h1>
+  <div class="input-section">
+    <input type="text" id="userid" placeholder="Enter User ID">
+    <button onclick="lookup()">Lookup</button>
+  </div>
+  <div id="results" class="results"></div>
+
+  <script>
+    async function lookup() {
+      const userId = document.getElementById("userid").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "<p>Loading...</p>";
+
+      try {
+        const res = await fetch("https://raw.githubusercontent.com/Reb0rnEnder/ishyfishy/main/dump.json");
+        if (!res.ok) throw new Error("Failed to fetch JSON");
+        const data = await res.json();
+
+        const matches = data.filter(item => String(item.creatorid) === userId);
+
+        if (matches.length === 0) {
+          resultsDiv.innerHTML = "<p>No results found for this user ID.</p>";
+          return;
+        }
+
+        resultsDiv.innerHTML = "";
+        matches.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+            <h2>${item.type}</h2>
+            <p><b>Creator ID:</b> ${item.creatorid}</p>
+            <p><b>Created:</b> ${new Date(item.created).toLocaleString()}</p>
+            <p><b>Updated:</b> ${new Date(item.updated).toLocaleString()}</p>
+          `;
+
+          if (item.link) {
+            card.innerHTML += `<p><b>Link:</b> <a href="${item.link}" target="_blank">${item.link}</a></p>`;
+          }
+
+          if (item.anwsers) {
+            const answersList = document.createElement("ul");
+            answersList.className = "answers";
+            item.anwsers.forEach(ans => {
+              const li = document.createElement("li");
+              li.textContent = ans;
+              answersList.appendChild(li);
+            });
+            card.appendChild(document.createElement("p")).innerHTML = "<b>Answers:</b>";
+            card.appendChild(answersList);
+          }
+
+          resultsDiv.appendChild(card);
+        });
+      } catch (err) {
+        resultsDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
