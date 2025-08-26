@@ -9,7 +9,7 @@
   <meta property="og:description" content="explore the goofy app dump">
   <meta property="og:image" content="https://apply.ishciv.com/_next/image?url=%2Flogo.png&w=256&q=75">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yourdomain.com/lookup.html">
+  <meta property="og:url" content="https://gh.dotbend.xyz/ishyfishy/">
 
   <!-- Twitter Card (optional, for better previews on Twitter) -->
   <meta name="twitter:card" content="summary_large_image">
@@ -46,7 +46,7 @@ let cachedData = null;
 
 async function loadData() {
   if (cachedData) return cachedData;
-  const res = await fetch("https://gh.dotbend.xyz/ishdump.json");
+  const res = await fetch("https://gh.dotbend.xyz/ishyfishy/validdump.json");
   const data = await res.json();
   cachedData = data.flat();
   return cachedData;
