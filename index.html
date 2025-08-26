@@ -23,11 +23,9 @@
   <input type="text" id="userid" placeholder="Enter User ID">
 </div>
 <div id="results" class="results"></div>
-
 <script>
 let cachedData = null;
 
-// Fetch and cache JSON
 async function loadData() {
   if (cachedData) return cachedData;
 
