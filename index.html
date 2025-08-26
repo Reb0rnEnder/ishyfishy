@@ -51,7 +51,7 @@ document.getElementById("userid").addEventListener("input", async () => {
 
   try {
     const data = await loadData();
-    const matches = data.filter(item => String(item.creatorid) === userId);
+    const matches = data.filter(item => item.creatorid == userId);
 
     if (matches.length === 0) {
       resultsDiv.innerHTML = "<p>No results found for this user ID.</p>";
