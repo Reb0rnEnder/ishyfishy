@@ -91,7 +91,7 @@ async function lookup(userId) {
   if (!userId) { document.getElementById("results").innerHTML = ""; return; }
   document.getElementById("results").innerHTML = "<p>Searching...</p>";
   const data = await loadData();
-  displayMatches(data.filter(item => item.creatorid == userId));
+  displayMatches(data.filter(item => String(item.creatorid) == String(userId)));
 }
 
 document.getElementById("userid").addEventListener("input", e => lookup(e.target.value.trim()));
