@@ -1,97 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>User Lookup</title>
-<style>
-  body { font-family: Arial,sans-serif; background:#121212; color:#eee; padding:20px; }
-  h1 { color:#fff; }
-  .input-section { margin-bottom:20px; }
-  input { padding:8px; border-radius:6px; border:none; width:250px; }
-  .results { margin-top:20px; }
-  .card { background:#1e1e1e; padding:15px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
-  .card h2 { margin:0 0 10px 0; color:#64b5f6; }
-  .answers { margin-top:10px; }
-  .answers li { margin-bottom:6px; }
-  a { color:#90caf9; text-decoration:none; }
-  a:hover { text-decoration:underline; }
-</style>
+  <meta charset="UTF-8">
+  <title>User Lookup</title>
+
+  <!-- Open Graph / Discord Embed -->
+  <meta property="og:title" content="tomfoolery">
+  <meta property="og:description" content="explore the goofy app dump">
+  <meta property="og:image" content="https://apply.ishciv.com/_next/image?url=%2Flogo.png&w=256&q=75">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourdomain.com/lookup.html">
+
+  <!-- Twitter Card (optional, for better previews on Twitter) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="tomfoolery">
+  <meta name="twitter:description" content="explore the goofy app dump">
+  <meta name="twitter:image" content="https://apply.ishciv.com/_next/image?url=%2Flogo.png&w=256&q=75">
+
+  <style>
+    body { font-family: Arial,sans-serif; background:#121212; color:#eee; padding:20px; }
+    h1 { color:#fff; }
+    .input-section { margin-bottom:20px; }
+    input { padding:8px; border-radius:6px; border:none; width:250px; }
+    button { padding:6px 12px; border-radius:6px; border:none; background:#1e88e5; color:#fff; cursor:pointer; margin-left:4px; }
+    button:hover { background:#1565c0; }
+    .results { margin-top:20px; }
+    .card { background:#1e1e1e; padding:15px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+    .card h2 { margin:0 0 10px 0; color:#64b5f6; }
+    .answers { margin-top:10px; }
+    .answers li { margin-bottom:6px; }
+    a { color:#90caf9; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+  </style>
 </head>
 <body>
 <h1>User Lookup</h1>
 <div class="input-section">
   <input type="text" id="userid" placeholder="Enter User ID">
+  <button id="randomBtn">Random User</button>
 </div>
 <div id="results" class="results"></div>
+
 <script>
 let cachedData = null;
 
 async function loadData() {
   if (cachedData) return cachedData;
-
-  const res = await fetch("https://raw.githubusercontent.com/Reb0rnEnder/ishyfishy/main/validdump.json");
-  if (!res.ok) throw new Error("Failed to fetch data");
-
-  const data = await res.json(); // now a nested array
-  cachedData = data.flat(); // flatten outer array
+  const res = await fetch("https://gh.dotbend.xyz/ishdump.json");
+  const data = await res.json();
+  cachedData = data.flat();
   return cachedData;
 }
 
-// Lookup on input
-document.getElementById("userid").addEventListener("input", async () => {
-  const userId = document.getElementById("userid").value.trim();
+function displayMatches(matches) {
   const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+  if (matches.length === 0) { resultsDiv.innerHTML = "<p>No results found.</p>"; return; }
 
-  if (!userId) {
-    resultsDiv.innerHTML = "";
-    return;
-  }
+  matches.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<h2>${item.type}</h2>
+      <p><b>Creator ID:</b> ${item.creatorid}</p>
+      <p><b>Created:</b> ${new Date(item.created).toLocaleString()}</p>
+      <p><b>Updated:</b> ${new Date(item.updated).toLocaleString()}</p>`;
 
-  resultsDiv.innerHTML = "<p>Searching...</p>";
-
-  try {
-    const data = await loadData();
-    const matches = data.filter(item => item.creatorid == userId);
-
-    if (matches.length === 0) {
-      resultsDiv.innerHTML = "<p>No results found for this user ID.</p>";
-      return;
+    if (item.link) card.innerHTML += `<p><b>Link:</b> <a href="${item.link}" target="_blank">${item.link}</a></p>`;
+    if (item.anwsers) {
+      const ul = document.createElement("ul");
+      ul.className = "answers";
+      item.anwsers.forEach(ans => { const li = document.createElement("li"); li.textContent = ans; ul.appendChild(li); });
+      card.appendChild(document.createElement("p")).innerHTML = "<b>Answers:</b>";
+      card.appendChild(ul);
     }
 
-    resultsDiv.innerHTML = "";
-    matches.forEach(item => {
-      const card = document.createElement("div");
-      card.className = "card";
-
-      card.innerHTML = `
-        <h2>${item.type}</h2>
-        <p><b>Creator ID:</b> ${item.creatorid}</p>
-        <p><b>Created:</b> ${new Date(item.created).toLocaleString()}</p>
-        <p><b>Updated:</b> ${new Date(item.updated).toLocaleString()}</p>
-      `;
-
-      if (item.link) {
-        card.innerHTML += `<p><b>Link:</b> <a href="${item.link}" target="_blank">${item.link}</a></p>`;
-      }
-
-      if (item.anwsers) {
-        const answersList = document.createElement("ul");
-        answersList.className = "answers";
-        item.anwsers.forEach(ans => {
-          const li = document.createElement("li");
-          li.textContent = ans;
-          answersList.appendChild(li);
-        });
-        card.appendChild(document.createElement("p")).innerHTML = "<b>Answers:</b>";
-        card.appendChild(answersList);
-      }
-
-      resultsDiv.appendChild(card);
+    // Copy link button
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copy Link";
+    copyBtn.addEventListener("click", () => {
+      const url = `${window.location.origin}${window.location.pathname}?id=${item.creatorid}`;
+      navigator.clipboard.writeText(url).then(() => { copyBtn.textContent="Copied!"; setTimeout(()=>copyBtn.textContent="Copy Link",1500); });
     });
+    card.appendChild(copyBtn);
 
-  } catch (err) {
-    resultsDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-  }
+    resultsDiv.appendChild(card);
+  });
+}
+
+async function lookup(userId) {
+  if (!userId) { document.getElementById("results").innerHTML = ""; return; }
+  document.getElementById("results").innerHTML = "<p>Searching...</p>";
+  const data = await loadData();
+  displayMatches(data.filter(item => item.creatorid == userId));
+}
+
+document.getElementById("userid").addEventListener("input", e => lookup(e.target.value.trim()));
+document.getElementById("randomBtn").addEventListener("click", async () => {
+  const data = await loadData();
+  const randomItem = data[Math.floor(Math.random()*data.length)];
+  document.getElementById("userid").value = randomItem.creatorid;
+  displayMatches([randomItem]);
+});
+
+// Auto lookup from URL ?id=
+window.addEventListener("load", () => {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  if (id) { document.getElementById("userid").value = id; lookup(id); }
 });
 </script>
 </body>
